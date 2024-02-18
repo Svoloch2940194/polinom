@@ -124,6 +124,7 @@ public:
             delete[] head;
             head = h;
         }
+        size=0;
     }
 
     Polinom(const Polinom& x)
