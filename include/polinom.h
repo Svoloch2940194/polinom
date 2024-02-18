@@ -64,7 +64,7 @@ struct step
     }
 };
 
-ll pow2(ld x, ll step_x)
+ld pow2(ld x, ll step_x)
 {
     if (step_x == 0) return 1;
     else
