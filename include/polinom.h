@@ -265,6 +265,8 @@ public:
         return true;
     }
 
+    bool operator!=(const Polinom& x) { return !(*this == x); }
+
     Polinom operator+(const Polinom& x)
     {
         Polinom ans;
