@@ -94,8 +94,7 @@ class Polinom
 {
     struct node
     {
-        ld c;
-        step xyz;
+        pair<ld, step> value;
         node* head;
 
         node() { head = nullptr; }
@@ -103,6 +102,7 @@ class Polinom
 
     node* head;
     size_t size;
+
 public:
 
     size_t _size() { return size; }
@@ -111,10 +111,55 @@ public:
     {
         auto x = new node;
         head = x;
-        x->c = 0;
-        x->xyz = { 0,0,0 };
+        x->value.first = 0;
+        x->value.second = { 0,0,0 };
         size = 0;
     }
+
+    ~Polinom()
+    {
+        while (head != nullptr)
+        {
+            node* h = head->head;
+            delete[] head;
+            head = h;
+        }
+    }
+
+    Polinom(const Polinom& x)
+    {
+        head = nullptr;
+        size = x.size;
+        node* h1 = x.head;
+        node* h;
+        while (h1 != nullptr)
+        {
+            if (head = nullptr)
+            {
+                auto n = new node;
+                n->value = h1->value;
+                head = n;
+                h = n;
+            }
+            else
+            {
+                auto n = new node;
+                n->value = h1->value;
+                head = n;
+                h = n;
+            }
+            h1 = h1->head;
+        }
+    }
+
+    Polinom(Polinom&& x) noexcept
+    {
+        size = x.size;
+        head = x.head;
+        x.head = nullptr;
+        x.size = 0;
+    }
+
     Polinom(string s)
     {
         size = 0;
@@ -216,24 +261,34 @@ public:
         for (auto x : step_c)
         {
             auto n = new node;
-            (n->c) = x.second;
-            (n->xyz) = x.first;
+            (n->value.first) = x.second;
+            (n->value.second) = x.first;
             (n->head) = head;
             head = n;
             ++size;
         }
     }
 
+    Polinom operator=(Polinom&& x) noexcept
+    {
+        swap(head, x.head);
+        swap(size, x.size);
+        return *this;
+    }
+
     Polinom operator=(const Polinom& x)
     {
+        if (head == x.head) return *this;
+        
+        this->~Polinom();
         size = x.size;
         node* h = x.head;
         auto new_head = new node;
         head = new_head;
         while (true)
         {
-            new_head->c = h->c;
-            new_head->xyz = h->xyz;
+            new_head->value.first = h->value.first;
+            new_head->value.second = h->value.second;
             h = h->head;
             if (h != nullptr)
             {
@@ -256,7 +311,7 @@ public:
 
         while (h1 != nullptr)
         {
-            if (h1->c != h2->c || h1->xyz != h2->xyz) return false;
+            if (h1->value.first != h2->value.first || h1->value.second != h2->value.second) return false;
 
             h1 = h1->head;
             h2 = h2->head;
@@ -277,9 +332,9 @@ public:
 
         while (h1 != nullptr && h2 != nullptr)
         {
-            if (h1->xyz == h2->xyz)
+            if (h1->value.second == h2->value.second)
             {
-                if (h1->c + h2->c != 0)
+                if (h1->value.first + h2->value.first != 0)
                 {
                     if (ans.size == 0) ans.head = ans_h;
                     else
@@ -289,8 +344,8 @@ public:
                         ans_h = a;
                     }
                     ++ans.size;
-                    ans_h->xyz = h1->xyz;
-                    ans_h->c = h1->c + h2->c;
+                    ans_h->value.second = h1->value.second;
+                    ans_h->value.first = h1->value.first + h2->value.first;
                     h1 = h1->head;
                     h2 = h2->head;
                 }
@@ -302,7 +357,7 @@ public:
             }
             else
             {
-                if (h1->xyz < h2->xyz)
+                if (h1->value.second < h2->value.second)
                 {
                     if (ans.size == 0) ans.head = ans_h;
                     else
@@ -312,8 +367,8 @@ public:
                         ans_h = a;
                     }
                     ++ans.size;
-                    ans_h->xyz = h2->xyz;
-                    ans_h->c = h2->c;
+                    ans_h->value.second = h2->value.second;
+                    ans_h->value.first = h2->value.first;
                     h2 = h2->head;
                 }
                 else
@@ -326,8 +381,8 @@ public:
                         ans_h = a;
                     }
                     ++ans.size;
-                    ans_h->xyz = h1->xyz;
-                    ans_h->c = h1->c;
+                    ans_h->value.second = h1->value.second;
+                    ans_h->value.first = h1->value.first;
                     h1 = h1->head;
                   
                 }
@@ -340,8 +395,8 @@ public:
             ans_h->head = del;
             ans_h = del;
             ++ans.size;
-            ans_h->xyz = h1->xyz;
-            ans_h->c = h1->c;
+            ans_h->value.second = h1->value.second;
+            ans_h->value.first = h1->value.first;
             h1 = h1->head;
         }
 
@@ -351,15 +406,15 @@ public:
             ans_h->head = del;
             ans_h = del;
             ++ans.size;
-            ans_h->xyz = h2->xyz;
-            ans_h->c = h2->c;
+            ans_h->value.second = h2->value.second;
+            ans_h->value.first = h2->value.first;
             h2 = h2->head;
         }
 
         if (ans.head == nullptr)
         {
             auto a = new node;
-            a->c = 0;
+            a->value.first = 0;
             ans.head = a;
         }
         return ans;
@@ -382,8 +437,8 @@ public:
         ans.size = size;
         while (true)
         {
-            ans_h->xyz = h->xyz;
-            ans_h->c = x * h->c;
+            ans_h->value.second = h->value.second;
+            ans_h->value.first = x * h->value.first;
             h = h->head;
             if (h != nullptr)
             {
@@ -426,9 +481,9 @@ public:
             node* h2 = head;
             while (h2 != nullptr)
             {
-                step a = h1->xyz * h2->xyz;
-                if (step_c[a] == 0) step_c[a] = h1->c * h2->c;
-                else step_c[a] += h1->c * h2->c;
+                step a = h1->value.second * h2->value.second;
+                if (step_c[a] == 0) step_c[a] = h1->value.first * h2->value.first;
+                else step_c[a] += h1->value.first * h2->value.first;
 
                 h2 = h2->head;
             }
@@ -441,8 +496,8 @@ public:
             if (x.second != 0)
             {
                 auto n = new node;
-                (n->c) = x.second;
-                (n->xyz) = x.first;
+                (n->value.first) = x.second;
+                (n->value.second) = x.first;
                 (n->head) = ans_h;
                 ans_h = n;
                 ++ans.size;
@@ -465,7 +520,7 @@ public:
         node* h = head;
         while (h != nullptr)
         {
-            ans += (h->c) * (x ^ (h->xyz));
+            ans += (h->value.first) * (x ^ (h->value.second));
             h = h->head;
         }
 
@@ -490,75 +545,75 @@ ostream& operator<<(ostream& out, Polinom& x)
     Polinom::node* h = x.head;
     while (h != nullptr)
     {
-        if (h->c > 0)
+        if (h->value.first > 0)
         {
             if (h == x.head)
             {
-                if (h->c != 1) out << h->c;
-                else if (h->xyz.x == 0 && h->xyz.y == 0 && h->xyz.z == 0) out << h->c;
-                if (h->xyz.x != 0)
+                if (h->value.first!= 1) out << h->value.first;
+                else if (h->value.second.x == 0 && h->value.second.y == 0 && h->value.second.z == 0) out << h->value.first;
+                if (h->value.second.x != 0)
                 {
-                    if (h->xyz.x > 1) out << "x^" << h->xyz.x;
+                    if (h->value.second.x > 1) out << "x^" << h->value.second.x;
                     else out << "x";
                 }
-                if (h->xyz.y != 0)
+                if (h->value.second.y != 0)
                 {
-                    if (h->xyz.y > 1) out << "y^" << h->xyz.y;
+                    if (h->value.second.y > 1) out << "y^" << h->value.second.y;
                     else out << "y";
                 }
-                if (h->xyz.z != 0)
+                if (h->value.second.z != 0)
                 {
-                    if (h->xyz.z > 1) out << "z^" << h->xyz.z;
+                    if (h->value.second.z > 1) out << "z^" << h->value.second.z;
                     else out << "z";
                 }
             }
             else
             {
-                if (h->c != 1) out << "+" << h->c;
+                if (h->value.first!= 1) out << "+" << h->value.first;
                 else
                 {
-                    if (h->xyz.x == 0 && h->xyz.y == 0 && h->xyz.z == 0) out << "+" << h->c;
+                    if (h->value.second.x == 0 && h->value.second.y == 0 && h->value.second.z == 0) out << "+" << h->value.first;
                     else out << "+";
                 }
-                if (h->xyz.x != 0)
+                if (h->value.second.x != 0)
                 {
-                    if (h->xyz.x > 1) out << "x^" << h->xyz.x;
+                    if (h->value.second.x > 1) out << "x^" << h->value.second.x;
                     else out << "x";
                 }
-                if (h->xyz.y != 0)
+                if (h->value.second.y != 0)
                 {
-                    if (h->xyz.y > 1) out << "y^" << h->xyz.y;
+                    if (h->value.second.y > 1) out << "y^" << h->value.second.y;
                     else out << "y";
                 }
-                if (h->xyz.z != 0)
+                if (h->value.second.z != 0)
                 {
-                    if (h->xyz.z > 1) out << "z^" << h->xyz.z;
+                    if (h->value.second.z > 1) out << "z^" << h->value.second.z;
                     else out << "z";
                 }
             }
         }
         else
         {
-            if (h->c != -1) out << h->c;
+            if (h->value.first != -1) out << h->value.first;
             else
             {
-                if (h->xyz.x == 0 && h->xyz.y == 0 && h->xyz.z == 0) out << h->c;
+                if (h->value.second.x == 0 && h->value.second.y == 0 && h->value.second.z == 0) out << h->value.first;
                 else out << "-";
             }
 
-            if (h->xyz.x != 0)
+            if (h->value.second.x != 0)
             {
-                if (h->xyz.x > 1) out << "x^" << h->xyz.x;
+                if (h->value.second.x > 1) out << "x^" << h->value.second.x;
                 else out << "x";
             }
-            if (h->xyz.y != 0)
+            if (h->value.second.y != 0)
             {
-                if (h->xyz.y > 1) out << "y^" << h->xyz.y;
+                if (h->value.second.y > 1) out << "y^" << h->value.second.y;
                 else out << "y";
             }
-            if (h->xyz.z != 0)
+            if (h->value.second.z != 0)
             {
-                if (h->xyz.z > 1) out << "z^" << h->xyz.z;
+                if (h->value.second.z > 1) out << "z^" << h->value.second.z;
                 else out << "z";
             }
         }
