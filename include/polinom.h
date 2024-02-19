@@ -97,7 +97,12 @@ class Polinom
         pair<ld, step> value;
         node* head;
 
-        node() { head = nullptr; }
+        node() 
+        {
+            head = nullptr;
+            value.first = 0;
+            value.second = { 0,0,0 };
+        }
     };
 
     node* head;
@@ -106,6 +111,19 @@ class Polinom
 public:
 
     size_t _size() { return size; }
+
+    struct iterator
+    {
+        node* id;
+
+        iterator(node* x) { id = x; }
+        pair<ld, step>& operator*() { return id->value; }
+        iterator operator++() { id = id->head; return *this; }
+        bool operator!=(const iterator& x) { return id != x.id; }
+    };
+
+    iterator end() { return nullptr; }
+    iterator begin() { return head; }
 
     Polinom() 
     {
@@ -472,23 +490,18 @@ public:
         return* this;
     }
 
-    Polinom operator *(const Polinom& x)
+    Polinom operator *(Polinom& x)
     {
         Polinom ans;
         Map<step, ld> step_c;
-        node* h1 = x.head;
-        while (h1 != nullptr)
+        for(auto h1:x)
         {
-            node* h2 = head;
-            while (h2 != nullptr)
+            for(auto h2:*this)
             {
-                step a = h1->value.second * h2->value.second;
-                if (step_c[a] == 0) step_c[a] = h1->value.first * h2->value.first;
-                else step_c[a] += h1->value.first * h2->value.first;
-
-                h2 = h2->head;
+                step a = h1.second * h2.second;
+                if (step_c[a] == 0) step_c[a] = h1.first * h2.first;
+                else step_c[a] += h1.first * h2.first;
             }
-            h1 = h1->head;
         }
 
         node* ans_h = nullptr;
@@ -509,7 +522,7 @@ public:
         return ans;
     }
 
-    Polinom operator*=(const Polinom& x)
+    Polinom operator*=(Polinom& x)
     {
         *this = *this * x;
         return* this;
@@ -518,14 +531,123 @@ public:
     ll operator[](const point& x)
     {
         ll ans = 0;
+        for(auto h:*this) ans += (h.first) * (x ^ (h.second));
+
+        return ans;
+    }
+
+    Polinom dx()
+    {
+        node* h = head;
+        while(h!=nullptr)
+        {
+            h->value.second.x++;
+            h->value.first /= h->value.second.x;
+            h = h->head;
+        }
+        return *this;
+    }
+
+    Polinom dy()
+    {
         node* h = head;
         while (h != nullptr)
         {
-            ans += (h->value.first) * (x ^ (h->value.second));
+            h->value.second.y++;
+            h->value.first /= h->value.second.y;
             h = h->head;
         }
+        return *this;
+    }
 
-        return ans;
+    Polinom dz()
+    {
+        node* h = head;
+        while (h != nullptr)
+        {
+            h->value.second.z++;
+            h->value.first /= h->value.second.z;
+            h = h->head;
+        }
+        return *this;
+    }
+
+    Polinom px()
+    {
+        node* h = head;
+        node* last = head;
+        while (h != nullptr)
+        {
+            h->value.first *= h->value.second.x, h->value.second.x--;
+            if (h->value.first == 0)
+            {
+                --size;
+                if (h == head) { head = h->head, last = head; delete[] h; }
+                else
+                {
+                    last->head = h->head;
+                    delete[] h;
+                }
+                h = last->head;
+                continue;
+            }
+            last = h;
+            h = h->head;
+        }
+        return *this;
+    }
+
+    Polinom py()
+    {
+        node* h = head;
+        node* last = head;
+        while (h != nullptr)
+        {
+            h->value.first*=h->value.second.y,h->value.second.y--;
+
+            if (h->value.first == 0)
+            {
+                --size;
+                if (h == head) { head = h->head, last = head; delete[] h; }
+                else
+                {
+                    last->head = h->head;
+                    delete[] h;
+                }
+                h = last->head;
+                continue;
+            }
+            last = h;
+            h = h->head;
+        }
+        return *this;
+    }
+
+    Polinom pz()
+    {
+        node* h = head;
+        node* last = head;
+        while (h != nullptr)
+        {
+            h->value.first *= h->value.second.z, h->value.second.z--;
+            
+            if (h->value.first == 0)
+            {
+                --size;
+                if (h == head) { head = h->head, last = head; delete[] h; }
+                else
+                {
+                    last->head = h->head;
+                    delete[] h;
+                }
+                h = last->head;
+                continue;
+            }
+            last = h;
+            h = h->head;
+            h = h->head;
+        }
+        return *this;
     }
 
     friend ostream& operator<<(ostream& out, Polinom& x);
