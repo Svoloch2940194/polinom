@@ -1,7 +1,7 @@
 #pragma once
 
 #include<iostream>
-
+#include<queue>
 using namespace std;
 
 typedef long long ll;
@@ -91,14 +91,8 @@ public:
         }
     };
 
-    iterator begin()
-    {
-        return be;
-    }
-    iterator end()
-    {
-        return nullptr;
-    }
+    iterator begin(){return be;}
+    iterator end(){return nullptr;}
 
     size_t _size() { return size; }
 
@@ -108,6 +102,28 @@ public:
 
         head = nullptr;
         size = 0;
+    }
+
+    ~Map()
+    {
+        if (head == nullptr) return;
+
+        queue<node*> q;
+        q.push(head);
+        while (!q.empty())
+        {
+            node* h = q.front();
+            q.pop();
+
+            if (h->left != nullptr) q.push(h->left);
+            if (h->right != nullptr) q.push(h->right);
+
+            delete h;
+        }
+
+        size = 0;
+        head = nullptr;
+        be = nullptr;
     }
 
     Value& operator[](const Key& key)

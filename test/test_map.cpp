@@ -11,10 +11,10 @@ TEST(Map, can_create_map_with_simple_type_and_add_element)
 
 TEST(Map, can_create_map_with_no_simple_type_ans_add_element)
 {
-    Map<string,ll> ma;
-    ma["a"] = 1;
-    ma["b"] = 2;
-    ASSERT_NO_THROW(ma["a"]);
+    Map<ll,string> ma;
+    ma[1] = "a";
+    ma[2] = "b";
+    ASSERT_NO_THROW(ma[1]);
 }
 
 TEST(Map, new_map_with_simple_type_check_change_value)
