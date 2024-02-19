@@ -536,7 +536,7 @@ public:
         return ans;
     }
 
-    Polinom dx()
+    void dx()
     {
         node* h = head;
         while(h!=nullptr)
@@ -545,10 +545,9 @@ public:
             h->value.first /= h->value.second.x;
             h = h->head;
         }
-        return *this;
     }
 
-    Polinom dy()
+    void dy()
     {
         node* h = head;
         while (h != nullptr)
@@ -557,10 +556,9 @@ public:
             h->value.first /= h->value.second.y;
             h = h->head;
         }
-        return *this;
     }
 
-    Polinom dz()
+    void dz()
     {
         node* h = head;
         while (h != nullptr)
@@ -569,10 +567,9 @@ public:
             h->value.first /= h->value.second.z;
             h = h->head;
         }
-        return *this;
     }
 
-    Polinom px()
+    void px()
     {
         node* h = head;
         node* last = head;
@@ -594,10 +591,9 @@ public:
             last = h;
             h = h->head;
         }
-        return *this;
     }
 
-    Polinom py()
+    void py()
     {
         node* h = head;
         node* last = head;
@@ -620,10 +616,9 @@ public:
             last = h;
             h = h->head;
         }
-        return *this;
     }
 
-    Polinom pz()
+    void pz()
     {
         node* h = head;
         node* last = head;
@@ -647,7 +642,6 @@ public:
             h = h->head;
             h = h->head;
         }
-        return *this;
     }
 
     friend ostream& operator<<(ostream& out, Polinom& x);
